@@ -26,25 +26,25 @@ jobs:
             project=$(echo "$sbom" | cut -d/ -f2)
             version=$(basename "$sbom" .cdx.json)
 
-            mkdir -p "$project/vulnerability_reports"
+            mkdir -p "$project/vulnerability_reports/releases"
 
             echo "Scanning $project $version"
 
             mise exec -- grype "sbom:$sbom" \
-              -o json > "$project/vulnerability_reports/$version.json"
+              -o json > "$project/vulnerability_reports/releases/$version.json"
           done
 
-      - name: Commit and push vulnerability reports
+      - name: Commit and push vulnerability reports for SBOMS
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          git add -- '*/vulnerability_reports/*.json'
+          git add -- '*/vulnerability_reports/releases/*.json'
 
           if git diff --cached --quiet; then
-            echo "No vulnerability report changes"
+            echo "No vulnerability report changes for SBOMs"
             exit 0
           fi
 
-          git commit -m "Update vulnerability reports"
+          git commit -m "Update vulnerability reports for SBOMs"
           git push
